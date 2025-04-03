@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Azure Dev Library Title Updater",
+  "version": "1.0",
+  "description": "Monitors URLs on dev.azure.com and updates the tab title with the 'path' query parameter for _library pages.",
+  "permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://dev.azure.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dev.azure.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}
