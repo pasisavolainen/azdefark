@@ -5,14 +5,19 @@
       remove: ""
     };
   
-    // Load settings from persistent storage
-    chrome.storage.sync.get(["environment", "remove"], function(result) {
-      customSettings.environment = result.environment || "";
-      customSettings.remove = result.remove || "";
-    });
+    // Use chrome.storage.sync if available, otherwise fallback to chrome.storage.local
+    const storage = chrome.storage.local;
   
-    // Store the last URL so we can detect changes
-    let lastUrl = window.location.href;
+    // Load settings from persistent storage and then execute callback
+    function loadSettings(callback) {
+      storage.get(["environment", "remove"], function(result) {
+        customSettings.environment = result?.environment || "";
+        customSettings.remove = result?.remove || "";
+        if (typeof callback === "function") {
+          callback();
+        }
+      });
+    }
   
     // Function to apply custom regex transformations on the raw title.
     function applyCustomRegexes(rawTitle) {
@@ -75,14 +80,15 @@
       }
     }
   
-    // Initial title update on page load
-    updateTitle();
+    // Mutation Observer to detect navigation changes in a SPA
+    let lastUrl = window.location.href;
+    loadSettings(updateTitle);
   
     // Create a MutationObserver to detect DOM changes that may indicate navigation
     const observer = new MutationObserver(() => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
-        updateTitle();
+        loadSettings(updateTitle);
       }
     });
   
@@ -93,7 +99,7 @@
     window.addEventListener('hashchange', () => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
-        updateTitle();
+        loadSettings(updateTitle);
       }
     });
   })();
