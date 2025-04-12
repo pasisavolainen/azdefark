@@ -2,7 +2,8 @@
     // Global variable for custom settings (populated from storage)
     let customSettings = {
       environment: "",
-      remove: ""
+      remove: "",
+      replace: []
     };
   
     // Use chrome.storage.sync if available, otherwise fallback to chrome.storage.local
@@ -10,9 +11,14 @@
   
     // Load settings from persistent storage and then execute callback
     function loadSettings(callback) {
-      storage.get(["environment", "remove"], function(result) {
+      storage.get(["environment", "remove", "replace"], function(result) {
         customSettings.environment = result?.environment || "";
         customSettings.remove = result?.remove || "";
+        customSettings.replace = (result?.replace || "")
+                                      .split(/\n/)
+                                      .map(s => s.split(/\s*@@@\s*/))
+                                        .filter(s => s.length === 2)
+                                      .map(s => ({ from: s[0], to: s[1] }));
         if (typeof callback === "function") {
           callback();
         }
@@ -53,6 +59,18 @@
           console.error("Invalid remove regex:", e);
         }
       }
+      if (customSettings.replace.length > 0) {
+        console.debug("Applying replace regexes:", customSettings.replace);
+        customSettings.replace.forEach(({ from, to }) => {
+          try {
+            const replaceRegex = new RegExp(from, 'g');
+            newTitle = newTitle.replace(replaceRegex, to);
+          } catch (e) {
+            console.error("Invalid replace regex:", e, from, { currentTitle: newTitle });
+          }
+        });
+      }
+
       return newTitle;
     }
   

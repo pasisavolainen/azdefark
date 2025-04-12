@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Azure Dev Library Title Updater Options</title>
+    <viewport name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
     <h1>Extension Settings</h1>
@@ -14,6 +15,10 @@
       <div>
         <label for="remove">Remove Regex:</label>
         <input type="text" id="remove" name="remove">
+      </div>
+      <div>
+        <label for="replace">Replace:</label>
+        <textarea id="replace" name="replace" rows="6" placeholder="search @@@ replacement" ></textarea>
       </div>
       <button type="submit">Save</button>
     </form>
