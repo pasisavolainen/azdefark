@@ -84,15 +84,33 @@
         if (url.host !== "dev.azure.com") return;
   
         // Regular expression: match a URL that starts with two segments followed by '/_library'
-        const regex = /^\/[^\/]+\/[^\/]+\/_library/;
-        if (!regex.test(url.pathname)) return;
+        const isLibraryRegex = /^\/[^\/]+\/[^\/]+\/_library/;
+        const isBuildRegex = /^\/[^\/]+\/[^\/]+\/_build/;
+        if (isLibraryRegex.test(url.pathname)) {
   
-        // Get the 'path' query parameter from the URL
-        const pathParam = url.searchParams.get("path");
-        if (pathParam) {
-          const rawTitle = decodeURIComponent(pathParam);
-          const newTitle = applyCustomRegexes(rawTitle);
-          document.title = newTitle;
+          // Get the 'path' query parameter from the URL
+          const pathParam = url.searchParams.get("path");
+          if (pathParam) {
+            const rawTitle = decodeURIComponent(pathParam);
+            const newTitle = applyCustomRegexes(rawTitle);
+            document.title = newTitle;
+          }
+        } else if (isBuildRegex.test(url.pathname)) {
+
+          const derp = JSON.parse(document.getElementById("dataProviders")?.innerText);
+          const definitionId = url.searchParams.get("definitionId");
+
+          let buildname = derp?.data["ms.vss-build-web.pipeline-details-data-provider"]?.definitionName;
+
+          if (!buildname) {          
+            // not individual build, so need to lookup in the pipelines data provider
+            var pipeline = derp?.data["ms.vss-build-web.pipelines-data-provider"]?.pipelines?.find(a => a.id === definitionId);
+            buildname = pipeline?.name;
+          }
+
+          if (buildname) {
+            document.title = "🚚 " + buildname;
+          }
         }
       } catch (error) {
         console.error("Error in updateTitle:", error);
@@ -122,4 +140,3 @@
       }
     });
   })();
-  
