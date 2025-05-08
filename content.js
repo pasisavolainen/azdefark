@@ -11,10 +11,11 @@
   
     // Load settings from persistent storage and then execute callback
     function loadSettings(callback) {
-      storage.get(["environment", "remove", "replace"], function(result) {
-        customSettings.environment = result?.environment || "";
-        customSettings.remove = result?.remove || "";
-        customSettings.replace = (result?.replace || "")
+      storage.get(["azdefarkSettings"], function(result) {
+        const settings = result.azdefarkSettings || {};
+        customSettings.environment = settings.environment || "";
+        customSettings.remove = settings.remove || "";
+        customSettings.replace = (settings.replace || "")
                                       .split(/\n/)
                                       .map(s => s.split(/\s*@@@\s*/))
                                         .filter(s => s.length === 2)
