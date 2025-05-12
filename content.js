@@ -93,20 +93,21 @@
           if (pathParam) {
             const rawTitle = decodeURIComponent(pathParam);
             const newTitle = applyCustomRegexes(rawTitle);
+            // the breadcrumb title will get '*' appended when variables are edited, abuse that to detect
+            // that some variable is considered "edited"
+            // document.querySelector('[aria-label="Laskutus.Tulosnakyma.kehi"]')
             document.title = newTitle;
           }
         } else if (isBuildRegex.test(url.pathname)) {
 
           const derp = JSON.parse(document.getElementById("dataProviders")?.innerText);
           const definitionId = url.searchParams.get("definitionId");
+          var pipeline = derp?.data["ms.vss-build-web.pipelines-data-provider"]?.pipelines?.find(a => a.id === definitionId);
+          const definitionScope = url.searchParams.get("definitionScope");
 
-          let buildname = derp?.data["ms.vss-build-web.pipeline-details-data-provider"]?.definitionName;
-
-          if (!buildname) {          
-            // not individual build, so need to lookup in the pipelines data provider
-            var pipeline = derp?.data["ms.vss-build-web.pipelines-data-provider"]?.pipelines?.find(a => a.id === definitionId);
-            buildname = pipeline?.name;
-          }
+          let buildname = derp?.data["ms.vss-build-web.pipeline-details-data-provider"]?.definitionName
+                          ?? pipeline?.name
+                          ?? definitionScope;
 
           if (buildname) {
             document.title = "🚚 " + buildname;
